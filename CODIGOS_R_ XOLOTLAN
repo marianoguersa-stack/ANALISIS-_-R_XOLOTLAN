@@ -1,0 +1,134 @@
+library(spdep)   # datos espaciales
+library(sf)      # datos espaciales
+library(spatialreg) # modelos SAR/SEM
+library(vioplot)   # gráficos de violín
+library(corrplot)  # gráficos de correlación 
+library(ggplot2)
+
+Xol <- read.csv2("C:/Users/marjh/OneDrive/Escritorio/Proyecto R/Xol.csv")
+View(Xol)
+
+head(Xol)
+summary(Xol)
+
+# Función para graficar histograma y boxplot en una misma ventana
+
+for (i in 3:6) {
+  par(mfrow = c(1, 2))   # 1 fila y 2 columnas
+  n <- names(Xol)[i]
+  # Histograma
+  hist(Xol[, i], main = "", xlab = n,  col = "lightblue")
+  
+  # Boxplot
+  boxplot(Xol[, i], main = "", horizontal = TRUE, col = "plum")
+}
+
+
+
+for (i in 3:5) {
+  par(mfrow = c(1, 2))   # 1 fila y 2 columnas
+  n <- names(Xol)[i]
+  # Histograma
+  hist(Xol[, i], main = "", xlab = n,  col = "lightblue")
+  
+  # Boxplot
+  boxplot(Xol[, i], main = "", horizontal = TRUE, col = "plum")
+}
+
+
+for (i in 3:4) {
+  par(mfrow = c(1, 2))   # 1 fila y 2 columnas
+  n <- names(Xol)[i]
+  # Histograma
+  hist(Xol[, i], main = "", xlab = n,  col = "lightblue")
+  
+  # Boxplot
+  boxplot(Xol[, i], main = "", horizontal = TRUE, col = "plum")
+}
+
+
+
+for (i in 3:3) {
+  par(mfrow = c(1, 2))   # 1 fila y 2 columnas
+  n <- names(Xol)[i]
+  # Histograma
+  hist(Xol[, i], main = "", xlab = n,  col = "lightblue")
+  
+  # Boxplot
+  boxplot(Xol[, i], main = "", horizontal = TRUE, col = "plum")
+}
+
+
+
+# Restaurar la configuración original
+par(mfrow = c(1,1))
+
+
+# versiòn simple
+lapply(Xol[,3:4], hist)
+lapply(Xol[,3:5], boxplot)
+
+
+
+### ~ "Unión" de histogramas y boxplots
+
+{r graphs, echo=T}
+
+
+#graficos de Violín sencillo
+vioplot(Xol$Temperatura)
+vioplot(Xol$OD)
+vioplot(Xol$pH)
+vioplot(Xol$Altitud)
+
+# Graficos de violín
+
+par(mfrow=c(1,1)) 
+
+par(mfrow=c(3,5)) # presentar 3 gráficos en 1 fila, 3 columnas
+vioplot(Xol$Temperatura, col="lightblue", main="temperatura", horizontal=TRUE)
+vioplot(Xol$OD, col="darkseagreen", main="OD")
+vioplot(Xol$pH, col="lightpink", main="pH")
+
+par(mfrow=c(1,1))  
+
+
+### Correlación
+
+```{r correlation, echo=T}
+(cor_mat <- cor(Xol[,3:6])) # Matriz de correlaciones
+
+
+# Gráficos de dispersión
+pairs(Xol[,3:6], pch=19, col="tan")
+
+
+# Visualización con corrplot
+
+corrplot(cor_mat, method = "circle", type = "upper",
+         col = colorRampPalette(c("orangered", "white", "mediumseagreen"))(200),
+         tl.col = "darkslateblue", tl.srt = 45, 
+         addCoef.col = "midnightblue", number.cex = 0.8)
+```
+
+
+
+## Datos espaciales
+
+#Visualización de la variable altura en el mapa, usando   longitud y latitud
+
+#Un primer intento usado Rbase:
+  ```{r espacial0, echo=T}
+
+# Convertir a objeto espacial (CRS WGS84)
+Xol<- st_as_sf(Xol, coords = c("longitud", "latitud"), crs = 4326)
+
+# Gráfico simple. El gradiente de color va de menor a mayor altura
+plot(Xol["Altitud"], main = "Altitud", pch=18, axes=T)
+
+
+# Gráfico con escala. El tamaño de los puntos va de menor a mayor altura
+plot(Xol["Altitud"], 
+     cex = scales::rescale(Xol$Altitud, to=c(1,6)),
+     col = "mediumblue", pch = 22,
+     main = "altura ", axes=T)
